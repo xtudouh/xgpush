@@ -28,12 +28,11 @@ const (
 	XGPUSH_PUSH_ACCOUNT_LIST_METHOD   = "push/account_list"
 	XGPUSH_PUSH_ALL_DEVICE_METHOD     = "push/all_device"
 
-	XGPUSH_PUSH_TAGS_METHOD			  =	"push/tags_device"
-	XGPUSH_BATCH_SET_TAGS_METHOD	  = "tags/batch_set"
-	XGPUSH_BATCH_DEL_TAGS_METHOD	  = "tags/batch_del"
+	XGPUSH_PUSH_TAGS_METHOD      = "push/tags_device"
+	XGPUSH_BATCH_SET_TAGS_METHOD = "tags/batch_set"
+	XGPUSH_BATCH_DEL_TAGS_METHOD = "tags/batch_del"
 
-
-	XGPUSH_GET_APP_DEVICE_NUM_METHOD  = "application/get_app_device_num"
+	XGPUSH_GET_APP_DEVICE_NUM_METHOD = "application/get_app_device_num"
 )
 
 const (
@@ -123,14 +122,14 @@ func NewXGPush(parameters *XGPushParameters) (xgpush *XGPush) {
 func (xgpush *XGPush) sign(method string, device_type int, params map[string]string) (err error) {
 	var secret_key string
 	switch device_type {
-		case XGPushDeviceType_IOS:
+	case XGPushDeviceType_IOS:
 		params["environment"] = xgpush.Param_environment
 		params["access_id"] = xgpush.Param_ios_access_id
 		secret_key = xgpush.Param_ios_secret_key
-		case XGPushDeviceType_Android:
+	case XGPushDeviceType_Android:
 		params["access_id"] = xgpush.Param_android_access_id
 		secret_key = xgpush.Param_android_secret_key
-		default:
+	default:
 		return ErrUnknownDeviceType
 	}
 	if _, found := params["timestamp"]; !found {
@@ -228,7 +227,7 @@ func (xgpush *XGPush) PushNotificationToSingleAndroidDevice(device_token, messag
 // --------------------------------------------
 // push/account_list
 func (xgpush *XGPush) PushToAccountList(device_type int, account_list []string,
-message, message_type string) error {
+	message, message_type string) error {
 	params := make(map[string]string)
 	jsondata, err := json.Marshal(account_list)
 	if err != nil {
@@ -245,7 +244,7 @@ message, message_type string) error {
 	return nil
 }
 func (xgpush *XGPush) PushNotificationToAccountList(device_type int, account_list []string,
-message string) error {
+	message string) error {
 	return xgpush.PushToAccountList(device_type, account_list, message, XGPushMessageType_Notification)
 }
 func (xgpush *XGPush) PushNotificationToIOSAccountList(account_list []string, message string) error {
@@ -278,7 +277,7 @@ func (xgpush *XGPush) PushNotificationToAllAndroidDevice(message string) {
 }
 
 func (xgpush *XGPush) PushToAllDeviceWithLoop(device_type int, message, message_type string,
-loop_times, loop_interval uint) {
+	loop_times, loop_interval uint) {
 	params := make(map[string]string)
 	params["message_type"] = message_type
 	params["message"] = message
@@ -291,15 +290,15 @@ loop_times, loop_interval uint) {
 	})
 }
 func (xgpush *XGPush) PushNotificationToAllDeviceWithLoop(device_type int, message string,
-loop_times, loop_interval uint) {
+	loop_times, loop_interval uint) {
 	xgpush.PushToAllDeviceWithLoop(device_type, message, XGPushMessageType_Notification, loop_times, loop_interval)
 }
 func (xgpush *XGPush) PushNotificationToAllIOSDeviceWithLoop(message string,
-loop_times, loop_interval uint) {
+	loop_times, loop_interval uint) {
 	xgpush.PushNotificationToAllDeviceWithLoop(XGPushDeviceType_IOS, message, loop_times, loop_interval)
 }
 func (xgpush *XGPush) PushNotificationToAllAndroidDeviceWithLoop(message string,
-loop_times, loop_interval uint) {
+	loop_times, loop_interval uint) {
 	xgpush.PushNotificationToAllDeviceWithLoop(XGPushDeviceType_IOS, message, loop_times, loop_interval)
 }
 
@@ -382,17 +381,16 @@ func (xgpush *XGPush) GetAppDeviceNum() (num int, err error) {
 //push/tags_device
 
 type PushToTagsResponse struct {
-	RetCode int                   `json:"ret_code"`
-	ErrMsg  string                `json:"err_msg"`
-	Result 	PushToTagsResult	  `json:"result"`
+	RetCode int              `json:"ret_code"`
+	ErrMsg  string           `json:"err_msg"`
+	Result  PushToTagsResult `json:"result"`
 }
 
 type PushToTagsResult struct {
-	PushId string	`json:"push_id"`
+	PushId string `json:"push_id"`
 }
 
-
-func (xgpush *XGPush)PushNotificationToTags(device_type int, message_type, message string, tags []string, tagOp string) (string, error) {
+func (xgpush *XGPush) PushNotificationToTags(device_type int, message_type, message string, tags []string, tagOp string) (string, error) {
 	params := make(map[string]string)
 	params["message_type"] = message_type
 	params["message"] = message
@@ -407,7 +405,6 @@ func (xgpush *XGPush)PushNotificationToTags(device_type int, message_type, messa
 	} else {
 		params["tags_op"] = tagOp
 	}
-
 
 	httpresp, err := xgpush.Post(&XGPushMsg{
 		Method:     XGPUSH_PUSH_TAGS_METHOD,
@@ -434,17 +431,17 @@ func (xgpush *XGPush)PushNotificationToTags(device_type int, message_type, messa
 	return resp.Result.PushId, nil
 }
 
-func (xgpush *XGPush)PushNotificationToAndroidTags(message_type, message string, tags []string, tagOp string) (string, error) {
+func (xgpush *XGPush) PushNotificationToAndroidTags(message_type, message string, tags []string, tagOp string) (string, error) {
 	return xgpush.PushNotificationToTags(XGPushDeviceType_Android, message_type, message, tags, tagOp)
 }
 
-func (xgpush *XGPush)PushNotificationToIOSTags(message string, tags []string, tagOp string) (string, error) {
+func (xgpush *XGPush) PushNotificationToIOSTags(message string, tags []string, tagOp string) (string, error) {
 	return xgpush.PushNotificationToTags(XGPushDeviceType_IOS, "0", message, tags, tagOp)
 }
 
 // --------------------------------------------
 //"tags/batch_set"
-func (xgpush *XGPush)BatchSetTags(device_type int, tagAndTokens [][]string) {
+func (xgpush *XGPush) BatchSetTags(device_type int, tagAndTokens [][]string) {
 	tagJsonStr, err := json.Marshal(tagAndTokens)
 	if err != nil {
 		log.Println("err", err.Error())
@@ -461,7 +458,7 @@ func (xgpush *XGPush)BatchSetTags(device_type int, tagAndTokens [][]string) {
 
 // --------------------------------------------
 //"tags/batch_del"
-func (xgpush *XGPush)BatchDelTags(device_type int, tagAndTokens [][]string) {
+func (xgpush *XGPush) BatchDelTags(device_type int, tagAndTokens [][]string) {
 	tagJsonStr, err := json.Marshal(tagAndTokens)
 	if err != nil {
 		log.Println("err", err.Error())
@@ -475,7 +472,6 @@ func (xgpush *XGPush)BatchDelTags(device_type int, tagAndTokens [][]string) {
 		DeviceType: device_type,
 	})
 }
-
 
 // ========================================
 // XGPushConn
